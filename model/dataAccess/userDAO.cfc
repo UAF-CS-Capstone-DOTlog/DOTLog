@@ -8,39 +8,6 @@ component UserDAO extends = "dotlog.model.dataAccess.DAO"
 		return this;
 	}
 
-	public dotlog.model.beans.user function search(required struct searchFilter)
-	{
-		var queryHandler = new query();
-
-		queryHandler.setName("fetchUserByUsername");
-		queryHandler.addParam(name = "username", value = searchFilter.username, cfsqltype = "cf_sql_varchar");
-
-		sqlString = "SELECT username, first_name, last_name, faa_code, user_permissions, enabled, email_addr "
-					& "FROM DL_USERS "
-					& "WHERE 1 = 1 ";
-
-		if ( !structIsEmpty(searchFilter) ) {
-			if ( structKeyExists(searchFilter, "username") ) {
-				queryHandler.addParam(name = "username", value = arguments.searchFilter.username, cfsqltype = "cf_sql_varchar");
-				sqlString &= " AND username = :username";
-			}
-		}
-
-		var queryResult = variables.queryHandler.executeQuery(queryHandler, sqlString);
-		var result = queryResult.getResult();
-		var objUser = '';
-		if (result.RecordCount) {
-			objUser = new dotlog.model.beans.user(username = result["username"][1],
-														firstName= result["FIRST_NAME"][1],
-														lastName = result["LAST_NAME"][1],
-														airportCode = result["FAA_CODE"][1],
-														permissions = result["USER_PERMISSIONS"][1],
-														enabled = result["ENABLED"][1],
-														emailAddr = result["EMAIL_ADDR"][1]);
-		}
-		return objUser;
-	}
-
 	public boolean function save(required dotlog.model.beans.user user)
 	{
 		if ( userExists(user) ) {
@@ -55,7 +22,13 @@ component UserDAO extends = "dotlog.model.dataAccess.DAO"
 		var queryHandler = getQueryHandler("updateUser", arguments.user);
 
 		sqlString = "UPDATE DL_USERS SET "
-					& "USERNAME = :username, FIRST_NAME = :firstName, LAST_NAME = :lastName, FAA_CODE = :airportCode, USER_PERMISSIONS = :permissions,  ENABLED = :enabled "
+					& "USERNAME = LOWER(:username), FIRST_NAME = :firstName,
+													LAST_NAME = :lastName, 
+													FAA_CODE = :airportCode, 
+													USER_PERMISSIONS = :permissions,  
+													ENABLED = :enabled, 
+													DISTRICT_MANAGER = :districtManager, 
+													REGION_MANAGER = :regionManager "
 					& "WHERE USERNAME = :username";
 		queryResult = variables.queryHandler.executeQuery(queryHandler, sqlString);
 
@@ -67,15 +40,15 @@ component UserDAO extends = "dotlog.model.dataAccess.DAO"
 		var queryHandler = getQueryHandler("createUser", arguments.user);
 
 		sqlString = "INSERT INTO DL_USERS "
-					& "(USERNAME, FIRST_NAME, LAST_NAME, FAA_CODE, USER_PERMISSIONS, EMAIL_ADDR, ENABLED) "
-					& "VALUES (:username, :firstName, :lastName, :airportCode, :permissions, :emailAddr, :enabled)";
+					& "(USERNAME, FIRST_NAME, LAST_NAME, FAA_CODE, USER_PERMISSIONS, EMAIL_ADDR, ENABLED, DISTRICT_MANAGER, REGION_MANAGER) "
+					& "VALUES (LOWER(:username), :firstName, :lastName, :airportCode, :permissions, :emailAddr, :enabled, :districtManager, :regionManager)";
 		queryResult = variables.queryHandler.executeQuery(queryHandler, sqlString);
 		return len(queryResult.getPrefix().rowID); //returns a number - need to fix?
 	}
 
 	private boolean function userExists(required dotlog.model.beans.user user)
 	{
-		var queryHandler = getQueryHandler("SeeIfUserExists", arguments.user);
+		var queryHandler = getQueryHandler("userExists", arguments.user);
 
 		sqlString = "SELECT username "
 					& "FROM DL_USERS "
@@ -97,6 +70,8 @@ component UserDAO extends = "dotlog.model.dataAccess.DAO"
 		queryHandler.addParam(name = "permissions", value = arguments.user.getPermissions(), cfsqltype = "cf_sql_number");
 		queryHandler.addParam(name = "emailAddr", value = arguments.user.getEmailAddr(), cfsqltype = "cf_sql_varchar");
 		queryHandler.addParam(name = "enabled", value = user.isEnabled(), cfsqltype = "cf_sql_number");
+		queryHandler.addParam(name = "districtManager", value = user.isDistrictManager(), cfsqltype = "cf_sql_number");
+		queryHandler.addParam(name = "regionManager", value = user.isDistrictManager(), cfsqltype = "cf_sql_number");
 
 		return queryHandler;
 	}

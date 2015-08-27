@@ -8,41 +8,16 @@ component AirportDAO extends = "dotlog.model.dataAccess.DAO"
 		return this;
 	}
 
-	public dotlog.model.beans.airport function search(required struct searchFilter)
-	{
-		var queryHandler = new query();
-
-		queryHandler.setName("searchForAirport");
-		
-		var sqlString = "SELECT faa_code, parent_faa_code, airport_name, enabled "
-					& "FROM DL_AIRPORTS " 
-					& "WHERE 1 = 1 ";
-
-		if ( !structIsEmpty(searchFilter) ) {
-			if ( structKeyExists(arguments.searchFilter, "airportCode") ) {
-				queryHandler.addParam(name = "faa_code", value = arguments.searchFilter.airportCode, cfsqltype = "cf_sql_varchar");
-				sqlString &= " AND faa_code = :faa_code";
-			}
-		}
-					
-		queryResult = variables.queryHandler.executeQuery(queryHandler, sqlString).getResult();
-		
-		return new dotlog.model.beans.airport(airportCode = queryResult["faa_code"][1],
-											parentAirportCode = queryResult["parent_faa_code"][1],
-											airportName = queryResult["airport_name"][1],
-											enabled = queryResult["enabled"][1]);
-	}
-
 	public boolean function save(required dotlog.model.beans.airport airport)
 	{
-		if ( airportExists(arguments.airport) ) {
+		if ( exists(arguments.airport) ) {
 			return updateAirport(arguments.airport);
 		} else {
 			return createAirport(arguments.airport);
 		}
 	}
 
-	private boolean function airportExists(required dotlog.model.beans.airport airport)
+	private boolean function exists(required dotlog.model.beans.airport airport)
 	{
 		var queryHandler = getQueryHandler("doesAirportExist", arguments.airport);
 		sqlString = "SELECT faa_code "
@@ -56,8 +31,8 @@ component AirportDAO extends = "dotlog.model.dataAccess.DAO"
 	{
 		var queryHandler = getQueryHandler("createAirport", arguments.airport);
 		sqlString = "INSERT INTO DL_AIRPORTS " 
-					& "(faa_code, parent_faa_code, airport_name, enabled) "
-					& "VALUES (:faa_code, :parent_faa_code, :airport_name, :enabled)";
+					& "(faa_code, hub_code, airport_name, district_id, enabled) "
+					& "VALUES (:faa_code, :hub_code, :airport_name, :districtID, :enabled)";
 		queryResult = variables.queryHandler.executeQuery(queryHandler, sqlString);
 		return len(queryResult.getPrefix().rowID); //returns a number - need to fix?
 	}
@@ -66,7 +41,7 @@ component AirportDAO extends = "dotlog.model.dataAccess.DAO"
 	{
 		var queryHandler = getQueryHandler("updateAirport", arguments.airport);
 		sqlString = "UPDATE DL_AIRPORTS SET "
-					& "parent_faa_code = :parent_faa_code, airport_name = :airport_name, enabled = :enabled "
+					& "hub_code = :hub_code, airport_name = :airport_name, district_id = :districtID, enabled = :enabled "
 					& "WHERE faa_code = :faa_code";
 		queryResult = variables.queryHandler.executeQuery(queryHandler, sqlString);
 		return len(queryResult.getPrefix().recordCount);
@@ -79,8 +54,9 @@ component AirportDAO extends = "dotlog.model.dataAccess.DAO"
 		queryHandler.setName(arguments.queryName);
 
 		queryHandler.addParam(name = "faa_code", value = arguments.airport.getAirportCode(), cfsqltype = "cf_sql_varchar");
-		queryHandler.addParam(name = "parent_faa_code", value = arguments.airport.getParentAirportCode(), cfsqltype = "cf_sql_varchar");
+		queryHandler.addParam(name = "hub_code", value = arguments.airport.getHubCode(), cfsqltype = "cf_sql_varchar");
 		queryHandler.addParam(name = "airport_name", value = arguments.airport.getAirportName(), cfsqltype = "cf_sql_varchar");
+		queryHandler.addParam(name = "districtID", value = arguments.airport.getDistrictID(), cfsqltype = "cf_sql_varchar");
 		queryHandler.addParam(name = "enabled", value = arguments.airport.isEnabled(), cfsqltype = "cf_sql_number");
 
 		return queryHandler;

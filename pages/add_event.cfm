@@ -1,43 +1,16 @@
 <cfset pageTitle = "Add Event">
-<cfinclude template="/dotlog/includes/header.cfm">
-<cfinclude template="/dotlog/includes/banner.cfm">
-    <a id="main_content"></a>
-<cfinclude template="/dotlog/includes/breadcrumb.cfm">
-<cfinclude template="/dotlog/includes/nav.cfm">
-    <div id="content">
-    
-<!-- BEGIN YOUR CONTENT HERE -->
-	<!-- TemplateBeginEditable name="main content" -->
+<cfinclude template="/dotlog/view/header.cfm">
+<cfinclude template="/dotlog/view/print_reports.cfm">
+
 <cfoutput><h2>#pageTitle#</h2></cfoutput>
 
-<cfscript>
-	childAirports = application.airportService.getChildAirports(session.user.getAirportCode());
-
-	airports = [];
-
-	for (ii = 1; ii <= arrayLen(childAirports); ++ii) {
-		temp = application.airportService.getChildAirports(childAirports[ii].getAirportCode());
-		arrayPrepend(temp, childAirports[ii]);
-		arrayAppend(airports, temp);
-		for (jj = 2; jj <= arrayLen(temp); ++jj) {
-			temp2 = application.airportService.getChildAirports(temp[jj].getAirportCode());
-			arrayAppend(airports, temp2);
-			for (kk = 1; kk <= arrayLen(temp2); ++kk) {
-				temp3 = application.airportService.getChildAirports(temp2[kk].getAirportCode());
-				arrayAppend(airports, temp3);
-			}
-		}
-	}
-
-	categories = application.categoryService.getAllCategories();
-</cfscript>
+<cfset airports = #application.airportService.getHubAndSpokesAirports(session.user.getAirportCode())# />
+<cfset categories = #application.categoryService.getAllCategories()# />
 
 <cfform name="recordCreation" method="post" action="record_action.cfm">
-	<!--- Need to change how user info is passed into the action page --->
-	<cfscript>
-		writeOutput('<input type="hidden" name="userID" value="#session.user.getUsername()#">');
-	</cfscript>
-
+	
+	<cfinput type="hidden" name="userID" value="#session.user.getUsername()#">
+	
 	<table>
 		<tr>
 			<td>Event Date</td>
@@ -51,27 +24,21 @@
 			<td>Airport</td>
 			<td>
 				<cfselect name="airportCode" required="true">
-					<cfoutput><option value="#session.user.getAirportCode()#">#session.user.getAirportCode()#</option></cfoutput>
-					<cfscript>
-						for (ii = 1; ii <= arrayLen(airports); ++ii) {
-							for (jj = 1; jj <= arrayLen(airports[ii]); ++jj) {
-								writeOutput('<option value=#airports[ii][jj].getAirportCode()#>#airports[ii][jj].getAirportCode()&' - '&airports[ii][jj].getAirportName()#</option>');
-							}
-						}
-					</cfscript>
+					<cfoutput><option value="-1">--Select Airport--</option></cfoutput>
+					<cfloop index="airport" array="#airports#">
+						<cfoutput><option value="#airport.getAirportCode()#">#airport.getAirportCode()# -- #airport.getAirportName()#</cfoutput>
+					</cfloop>
 				</cfselect>
 			</td>
 		</tr>
 		<tr>
 			<td>Category</td>
 			<td>
-				<cfselect name="categoryTitle" id="categoryTitle">
-					<cfoutput><option value="">--select category--</option></cfoutput>
-					<cfscript>
-						for (ii = 1; ii <= arrayLen(categories); ++ii) {
-							writeOutput('<option value=#categories[ii].getCategoryTitle()#>#categories[ii].getCategoryTitle()#</option>');
-						}
-					</cfscript>
+				<cfselect name="categoryID">
+					<cfoutput><option value="-1">--Select Category--</option></cfoutput>
+					<cfloop index="category" array="#categories#">
+						<cfoutput><option value="#category.getCategoryID()#">#category.getCategoryTitle()#</cfoutput>
+					</cfloop>
 	 			</cfselect>
 	 		</td>
 		</tr>
@@ -89,15 +56,8 @@
 		</tr>
 	</table>
 </cfform>
-     
-		<br>
-<!--- Gets the latest records and displays under form entry --->		
-<cfinclude template="/dotlog/view/print_reports.cfm">
-<cfscript>
-	for (ii = 1; ii <= arrayLen(airports); ++ii) {
-		printAirportRecords(airports[ii]);
-	}
-</cfscript>
-	<!-- TemplateEndEditable -->
-<!-- END YOUR CONTENT HERE -->
+  
+<br>
+
+<cfscript>printAirportRecords(airports);</cfscript>
 <cfinclude template="/dotlog/includes/footer.cfm">

@@ -1,16 +1,8 @@
 <cfset pageTitle = "Search"> <!--- Variable that is used in the html included header --->
-<cfinclude template="/dotlog/includes/header.cfm">
-<cfinclude template="/dotlog/includes/banner.cfm">
-	<a id="main_content"></a>
-<cfinclude template="/dotlog/includes/breadcrumb.cfm">
-<cfinclude template="/dotlog/includes/nav.cfm">
-	<div id="content">
-	
-<!-- BEGIN YOUR CONTENT HERE -->
-  <!-- TemplateBeginEditable name="main content" -->
+<cfinclude template="/dotlog/view/header.cfm">
 <cfoutput><h2>#pageTitle#</h2></cfoutput>
 <cfscript>
-	airports = application.airportService.getChildAirports(session.user.getAirportCode());
+	airports = application.airportService.getSpokeAirports(session.user.getAirportCode());
 	categories = application.categoryService.getAllCategories();
 </cfscript>
 <cfform name="search" action="search_action.cfm" method="post">
@@ -21,33 +13,18 @@
 			
 		</tr>
 		<tr>
-			<td>LDAP User</td>
+			<td>Username</td>
 			<td><cfinput type = "text" name = "username" message = "" required = "no"/></td>
 			
 		</tr>
-		<!---
-		<tr>
-			<td>First Name</td>
-			<td><cfinput type = "text" name = "firstName" message = "" required = "no"/></td>
-			
-		</tr>
-		<tr>
-			<td>Last Name</td>
-			<td><cfinput type = "text" name = "lastName" message = "" required = "no"/></td>
-			
-		</tr>
-		--->
 		<tr>
 			<td>Airport</td>
 			<td>
 				<cfselect name="airportCode" id="airportCode">
-					<cfscript>
-						writeOutput('<option value=""></option>');
-						writeOutput('<option value=#session.user.getAirportCode()#>#session.user.getAirportCode()#</option>');
-						for (ii = 1; ii <= arrayLen(airports); ++ii) {
-							writeOutput('<option value=#airports[ii].getAirportCode()#>#airports[ii].getAirportCode()&' - '&airports[ii].getAirportName()#</option>');
-						}
-					</cfscript>
+					<option value=""></option>
+					<cfloop array="#airports#" index="airport">
+						<cfoutput><option value="#airport.getAirportCode()#">#airport.getAirportCode()# - #airport.getAirportName()#</option></cfoutput>
+					</cfloop>
 				</cfselect>
 			</td>
 			
@@ -55,22 +32,18 @@
 		<tr>
 			<td>Category</td>
 			<td>
-				<cfselect name="categoryTitle" id="categoryTitle">
-					<cfscript>
-						writeOutput('<option value=""></option>');
-						for (ii = 1; ii <= arrayLen(categories); ++ii) {
-							writeOutput('<option value=#categories[ii].getCategoryTitle()#>#categories[ii].getCategoryTitle()#</option>');
-						}
-					</cfscript>
+				<cfselect name="categoryTitle" id="categoryTitle">					
+					<option value=""></option>
+					<cfloop array="#categories#" index="category">
+						<cfoutput><option value="#category.getCategoryTitle()#">#category.getCategoryTitle()#</option></cfoutput>
+					</cfloop>					
 				</cfselect>
 			</td>
-			
 		</tr>
 		<tr>
 			<td>Start Date</td>
 			<td><cfinput type="datefield" name="startDate" message=""/></td>
-		</tr>
-		<tr>
+			<td><strong>and</strong></td>
 			<td>End Date</td>
 			<td><cfinput type="datefield" name="endDate" message=""/></td>
 		</tr>
@@ -80,6 +53,4 @@
 		</tr>
 	</table>
 </cfform>
-  <!-- TemplateEndEditable -->
-<!-- END YOUR CONTENT HERE -->
 <cfinclude template="/dotlog/includes/footer.cfm">

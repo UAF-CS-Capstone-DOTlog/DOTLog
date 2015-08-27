@@ -1,15 +1,15 @@
-component GatewayTestAdapter
+component GatewayTestAdapter extends = "dotlog.model.dataAccess.gateway"
 {
 	variables.gatewayObject = '';
 
-	public DAOTestAdapter function init(required dotlog.model.dataAccess.gateway GW)
+	public GatewayTestAdapter function init(required dotlog.model.dataAccess.gateway GW)
 	{
 		variables.gatewayObject = arguments.GW;
 		return this;
 	}
 
-	public any function filter(required struct searchParameters) //TODO: figure a way to return proper objects for DB
+	public any function filter(struct searchFilter=structNew()) //TODO: figure a way to return proper objects for DB
 	{
-		//TODO
+		return variables.gatewayObject.filter(searchFilter);
 	}
 }

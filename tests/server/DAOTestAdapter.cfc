@@ -1,4 +1,4 @@
-component DAOTestAdapter
+component DAOTestAdapter extends = "dotlog.model.dataAccess.DAO"
 {
 	variables.dataAccessObject = '';
 
@@ -15,19 +15,6 @@ component DAOTestAdapter
 				variables.dataAccessObject.save(object);
 				transactionRollBack();
 				return true;
-			}
-		} catch (database expt) {
-			rethrow;
-		}
-	}
-
-	public any function search(required struct searchParameters) //TODO: figure a way to return proper objects for DB
-	{
-		try {
-			transaction action="begin" {
-				result = variables.dataAccessObject.search(searchParameters);
-				transactionRollBack();
-				return result;
 			}
 		} catch (database expt) {
 			rethrow;

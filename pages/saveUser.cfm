@@ -1,10 +1,5 @@
 <cfset pageTitle = "User Added"> <!--- Variable that is used in the html included header --->
-<cfinclude template="/dotlog/includes/header.cfm">
-<cfinclude template="/dotlog/includes/banner.cfm">
-  <a id="main_content"></a>
-<cfinclude template="/dotlog/includes/breadcrumb.cfm">
-<cfinclude template="/dotlog/includes/nav.cfm">
-    <div id="content">
+<cfinclude template="/dotlog/view/header.cfm">
     
 <!-- BEGIN YOUR CONTENT HERE -->
   <!-- TemplateBeginEditable name="main content" -->
@@ -13,7 +8,7 @@
 		FORM.enabled = 1;
 		newUser = new dotlog.model.beans.user(argumentCollection=FORM);
 		if ( application.userService.saveUser(newUser) ) {
-			writeOutput('<h2>New user "' & newUser.getUsername() & '" Added</h2>');
+			writeOutput('<h2>New User "' & newUser.getUsername() & '" Added</h2>');
 		} else {
 			writeOutput('Error creating user ' & newUser.getUsername());
 		}

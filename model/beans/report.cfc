@@ -5,19 +5,22 @@ component Report
 		username = '',
 		airportCode = '',
 		beginDate = '',
-		endDate = ''
+		endDate = '',
+		weeklyReport = ''
 	};
 
 	public Report function init(required string username,
 								required string airportCode,
 								required string beginDate,
 								required string endDate,
+								required numeric weeklyReport,
 								required numeric reportID = -1)
 	{
 		variables.instance.reportID = arguments.reportID;
 		variables.instance.username = arguments.username;
 		variables.instance.airportCode = arguments.airportCode;
 		variables.instance.beginDate = arguments.beginDate;
+		variables.instance.weeklyReport = arguments.weeklyReport;
 		variables.instance.endDate = arguments.endDate;
 		return this;
 	}
@@ -45,5 +48,10 @@ component Report
 	public string function getEndDate()
 	{
 		return variables.instance.endDate;
-	}	
+	}
+
+	public boolean function isWeeklyReport()
+	{
+		return variables.instance.weeklyReport;
+	}
 }

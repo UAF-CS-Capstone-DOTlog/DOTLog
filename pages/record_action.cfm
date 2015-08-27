@@ -1,21 +1,14 @@
-<cfset pageTitle = "Event Added">
-<cfinclude template="/dotlog/includes/header.cfm">
-<cfinclude template="/dotlog/includes/banner.cfm">
-    <a id="main_content"></a>
-<cfinclude template="/dotlog/includes/breadcrumb.cfm">
-<cfinclude template="/dotlog/includes/nav.cfm">
-    <div id="content">
-
-<cfoutput><h2>#pageTitle#</h2></cfoutput>
+<cfset pageTitle = "Event Saved">
+<cfinclude template="/dotlog/view/header.cfm">
+<cfoutput><h2>pageTitle</h2></cfoutput>
 <cfscript>
-
 	if ( isNull(FORM.includeWeeklyReport) ) {
 		reporting = 0;
 	} else {
 		reporting = 1;
 	}
 
-	reportedCategory = application.categoryService.getCategoryByTitle(FORM.categoryTitle);
+	reportedCategory = application.categoryService.getCategoryByID(FORM.categoryID);
 	if (reportedCategory.isInWeeklyReport()) {
 		reporting = 1;
 	}
@@ -26,11 +19,10 @@
 										  eventTime =  CREATEODBCDATETIME( FORM.eventDate & FORM.eventTime ),
 										  recordTime =  CREATEODBCDATETIME( now() ),
 										  inWeeklyReport = reporting,
-										  categoryTitle = FORM.categoryTitle);
-	application.recordService.save(record);	
+										  categoryID = FORM.categoryID);
+	application.recordService.saveRecord(record);	
 
-	airports = application.airportService.getChildAirports(session.user.getAirportCode());
-	categories = application.categoryService.getAllCategories();
+	airports = application.airportService.getHubAndSpokesAirports(session.user.getAirportCode());
 </cfscript>
 <cfinclude template="/dotlog/view/print_reports.cfm">
 <cfscript>

@@ -8,16 +8,23 @@ component
 	this.mappings[ "/dotlog" ] = this.rootDir;
 	this.mappings[ "/includes" ] = (this.rootDir & "includes\");
 	this.domain = "DOTLOGDATABASEW\";
+	this.systemEmailAddr = "no-reply@dotlog.ak.us.gov";
+	
 
 	function onApplicationStart()
 	{
 		var datasource = new dotlog.model.beans.datasource(DSName = "DOTlogDB", username = "", password = "");
-		
-		Application.categoryService = new dotlog.model.dataAccess.categoryService(datasource);
-		Application.recordService = new dotlog.model.dataAccess.recordService(datasource);
-		Application.userService = new dotlog.model.dataAccess.userService(datasource);
-		Application.airportService = new dotlog.model.dataAccess.airportService(datasource);
-		Application.reportService = new dotlog.model.dataAccess.reportService(datasource);
+		var serviceFactory = new dotlog.model.service.serviceFactory(datasource);
+
+		Application.categoryService = serviceFactory.get("categoryService");
+		Application.recordService = serviceFactory.get("recordService");
+		Application.userService = serviceFactory.get("userService");
+		Application.airportService = serviceFactory.get("airportService");
+		Application.reportService = serviceFactory.get("reportService");
+		Application.regionService = serviceFactory.get("regionService");
+		Application.districtService = serviceFactory.get("districtService");
+
+		Application.systemEmailAddr = this.systemEmailAddr;
 	}
 
 	function onRequestStart()
@@ -27,12 +34,22 @@ component
 
 	function onSessionStart()
 	{
-		try {
+		//try {
 			session.user = application.userService.getUserByUsername(removeChars(getAuthUser(), 1, len(this.domain)));
-		} catch (any expt) {
-			writeDump(expt);
-			onApplicationStart();
+		//} catch (any e) {
+	//		writeDump(e);
+	//		writeDump(SESSION);
+	//		throw;
+	//	}
+	}
+/*
+	function onError(required any e, required string EventName)
+	{
+		if (arguments.EventName == "onSessionStart") {
+			if (e.Type == "InvalidData") {
+				include "/dotlog/templates/error.cfm";
+			}
 		}
 	}
+*/
 }
-

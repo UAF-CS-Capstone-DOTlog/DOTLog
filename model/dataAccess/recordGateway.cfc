@@ -8,16 +8,20 @@ component RecordGateway extends = "dotlog.model.dataAccess.gateway"
 		return this;
 	}
 
-	public array function search(required struct searchFilter)
+	public array function filter(required struct searchFilter)
 	{
 		var queryService = new query();
 		queryService.setName("fetchRecords");
 
-		sqlStringRecords = "SELECT record_id, record_text, username, faa_code, event_time, record_time, in_weekly_report, category_title "
+		sqlStringRecords = "SELECT record_id, record_text, username, faa_code, event_time, record_time, in_weekly_report, category_id "
 						& " FROM DL_RECORDS "
 						& " WHERE 1 = 1 ";
 
 		if ( !structIsEmpty(searchFilter) ) {
+			if ( structKeyExists(searchFilter, "recordID") ) {
+				queryService.addParam(name = "recordID", value = arguments.searchFilter.recordID, cfsqltype = "cf_sql_number");	
+				sqlStringRecords &= " AND record_id = :recordID";
+			}
 			if ( structKeyExists(searchFilter, "username") ) {
 				queryService.addParam(name = "username", value = "%"&arguments.searchFilter.username&"%", cfsqltype = "cf_sql_varchar");	
 				sqlStringRecords &= " AND username LIKE :username";
@@ -26,9 +30,9 @@ component RecordGateway extends = "dotlog.model.dataAccess.gateway"
 				queryService.addParam(name = "keyword", value = "%"&arguments.searchFilter.keyword&"%", cfsqltype = "cf_sql_varchar");	
 				sqlStringRecords &= " AND LOWER(record_text) LIKE LOWER(:keyword)";
 			}
-			if ( structKeyExists(searchFilter, "categoryTitle") ) {
-				queryService.addParam(name = "category_title", value = "%"&arguments.searchFilter.categoryTitle&"%", cfsqltype = "cf_sql_varchar");	
-				sqlStringRecords &= " AND LOWER(category_title) LIKE LOWER(:category_title)";
+			if ( structKeyExists(searchFilter, "categoryID") ) {
+				queryService.addParam(name = "category_id", value = arguments.searchFilter.categoryID, cfsqltype = "cf_sql_number");	
+				sqlStringRecords &= " AND category_id = :category_id";
 			}
 			if ( structKeyExists(searchFilter, "airportCode") ) {
 				queryService.addParam(name = "faa_code", value = "%"&arguments.searchFilter.airportCode&"%", cfsqltype = "cf_sql_varchar");	
@@ -61,7 +65,7 @@ component RecordGateway extends = "dotlog.model.dataAccess.gateway"
 							eventTime = result["event_time"][ii],
 							recordTime = result["record_time"][ii],
 							inWeeklyReport = result["in_weekly_report"][ii],
-							categoryTitle = result["category_title"][ii],
+							categoryID = result["category_id"][ii],
 							recordID = result["record_id"][ii]);
 			 arrayAppend(recordObjects, recordObject);
 		}

@@ -17,23 +17,29 @@ component User
 		permissions = '',
 		airportCode = '',
 		enabled = '',
+		districtManager = '',
+		regionManager = '',
 		emailAddr = '' 
 	};
-        
+
 	public User function init(required string username,
 								required string firstName,
 								required string lastName,
 								required string airportCode,
 								required numeric permissions,
 								required numeric enabled,
+								required numeric districtManager,
+								required numeric regionManager,
 								required string emailAddr)
 	{
-		variables.instance.username = arguments.username;
+		variables.instance.username = LCase(arguments.username);
 		variables.instance.firstName = arguments.firstName;
 		variables.instance.lastName = arguments.lastName;
 		variables.instance.permissions = arguments.permissions;
 		variables.instance.airportCode = arguments.airportCode;
 		variables.instance.enabled = arguments.enabled;
+		variables.instance.districtManager = arguments.districtManager;
+		variables.instance.regionManager = arguments.regionManager;
 		variables.instance.emailAddr = arguments.emailAddr;
 
 		return this;
@@ -77,6 +83,16 @@ component User
 	public boolean function isEnabled()
 	{
 		return (variables.instance.enabled);
+	}
+
+	public boolean function isDistrictManager()
+	{
+		return (variables.instance.districtManager);
+	}
+
+	public boolean function isRegionManager()
+	{
+		return (variables.instance.RegionManager);
 	}
 
 	public string function getEmailAddr()
